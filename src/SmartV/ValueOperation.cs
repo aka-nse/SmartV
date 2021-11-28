@@ -43,6 +43,11 @@ namespace SmartV
         }
 
 
+        /// <summary>
+        /// Registers value operation strategy.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="operation"></param>
         public static void Register<T>(IValueOperation<T> operation)
             => Cache<T>.Register(operation);
     }
