@@ -1,17 +1,14 @@
-﻿using System;
+﻿namespace SmartV;
 
-namespace SmartV
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+public class ValueOperationAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-    public class ValueOperationAttribute : Attribute
+    public Type OperationProviderType { get; }
+
+
+    public ValueOperationAttribute(Type operationProviderType)
     {
-        public Type OperationProviderType { get; }
 
-
-        public ValueOperationAttribute(Type operationProviderType)
-        {
-
-            OperationProviderType = operationProviderType;
-        }
+        OperationProviderType = operationProviderType;
     }
 }

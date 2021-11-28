@@ -1,12 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>9.0</LangVersion>
+        <LangVersion>10.0</LangVersion>
         <Nullable>enable</Nullable>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <IsPackable>false</IsPackable>
         <RootNamespace>SmartV</RootNamespace>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Include="ValueOperationTest.g.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ValueOperationTest.tt</DependentUpon>
+      </None>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
@@ -23,6 +31,22 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\SmartV\SmartV.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="ValueOperationTest.tt">
+        <Generator>TextTemplatingFileGenerator</Generator>
+        <LastGenOutput>ValueOperationTest.g.cs</LastGenOutput>
+      </None>
+      <Compile Update="ValueOperationTest.g.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ValueOperationTest.tt</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
