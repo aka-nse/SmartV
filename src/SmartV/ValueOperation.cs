@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace SmartV
 {
@@ -50,5 +51,10 @@ namespace SmartV
         /// <param name="operation"></param>
         public static void Register<T>(IValueOperation<T> operation)
             => Cache<T>.Register(operation);
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static TTo As<TFrom, TTo>(in TFrom x)
+            => Unsafe.As<TFrom, TTo>(ref Unsafe.AsRef(x));
     }
 }

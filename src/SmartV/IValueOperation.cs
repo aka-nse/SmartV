@@ -7,6 +7,14 @@
 public interface IValueOperation<T>
 {
     /// <summary></summary>
+    /// <exception cref="NotSupportedException" />
+    T Zero { get; }
+
+    /// <summary></summary>
+    /// <exception cref="NotSupportedException" />
+    T One { get; }
+
+    /// <summary></summary>
     /// <param name="x"></param>
     /// <returns></returns>
     /// <exception cref="NotSupportedException" />

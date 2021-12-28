@@ -33,6 +33,18 @@
             <DependentUpon>ValueOperation.Comparison.tt</DependentUpon>
         </Compile>
     </ItemGroup>
+    
+    <ItemGroup>
+        <None Update="ValueOperation.Const.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>ValueOperation.Const.g.cs</LastGenOutput>
+        </None>
+        <Compile Update="ValueOperation.Const.g.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>ValueOperation.Const.tt</DependentUpon>
+        </Compile>
+    </ItemGroup>
 
     <ItemGroup>
         <None Update="ValueOperation.Shift.tt">
@@ -72,7 +84,7 @@
 
 <!--
 ========================================================================================================================
-= ValueOperation =======================================================================================================
+= VectorOperation =======================================================================================================
 ========================================================================================================================
 -->
 

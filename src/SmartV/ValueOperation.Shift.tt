@@ -10,17 +10,17 @@ var operations = new (string, Func<string, string, string>) [] {
     ("ShiftRight", (x, y) =>$"{x} >> {y}"),
 };
 var types = new TypeDef [] {
-    new TypeDef("bool"   , false),
-    new TypeDef("byte"   , true ),
-    new TypeDef("ushort" , true ),
-    new TypeDef("uint"   , true ),
-    new TypeDef("ulong"  , true ),
-    new TypeDef("sbyte"  , true ),
-    new TypeDef("short"  , true ),
-    new TypeDef("int"    , true ),
-    new TypeDef("long"   , true ),
-    new TypeDef("float"  , false),
-    new TypeDef("double" , false),
+    new TypeDef("bool   ", false),
+    new TypeDef("byte   ", true ),
+    new TypeDef("ushort ", true ),
+    new TypeDef("uint   ", true ),
+    new TypeDef("ulong  ", true ),
+    new TypeDef("sbyte  ", true ),
+    new TypeDef("short  ", true ),
+    new TypeDef("int    ", true ),
+    new TypeDef("long   ", true ),
+    new TypeDef("float  ", false),
+    new TypeDef("double ", false),
     new TypeDef("decimal", false),
 };
 #>
@@ -43,16 +43,11 @@ partial class ValueOperation
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T <#=opname#><T>(in T x, int y)
     {
-<# foreach(var type in types) { #>
-        if(typeof(T) == typeof(<#=type.Name#>))
-        {
-<# if(type.IsSupported) { #>
-            var z = (<#=type#>)(<#=op($"Unsafe.As<T, {type}>(ref Unsafe.AsRef(x))", $"y")#>);
-            return Unsafe.As<<#=type#>, T>(ref z);
-<# } else { #>
-            throw new NotSupportedException();
+<# foreach(var type in types.Where(type => type.IsSupported)) { #>
+        if(typeof(T) == typeof(<#=type.Name#>)) return As<<#=type#>, T>((<#=type#>)(<#=op($"As<T, {type}>(x)", $"y")#>));
 <# } #>
-        }
+<# foreach(var type in types.Where(type => !type.IsSupported)) { #>
+        if(typeof(T) == typeof(<#=type.Name#>)) throw new NotSupportedException(); 
 <# } #>
         return Cache<T>.Instance.<#=opname#>(x, y);
     }

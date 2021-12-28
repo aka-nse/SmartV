@@ -13,17 +13,17 @@ var operations = new (string, Func<string, string>) [] {
 };
 var types = new TypeDef [] {
 //              type       +x     -x     !x     ~x
-    new TypeDef("bool"   , false, false, true , false),
-    new TypeDef("byte"   , false, false, false, true ),
-    new TypeDef("ushort" , false, false, false, true ),
-    new TypeDef("uint"   , false, false, false, true ),
-    new TypeDef("ulong"  , false, false, false, true ),
-    new TypeDef("sbyte"  , true , true , false, true ),
-    new TypeDef("short"  , true , true , false, true ),
-    new TypeDef("int"    , true , true , false, true ),
-    new TypeDef("long"   , true , false, false, true ),
-    new TypeDef("float"  , true , true , false, false),
-    new TypeDef("double" , true , true , false, false),
+    new TypeDef("bool   ", false, false, true , false),
+    new TypeDef("byte   ", false, false, false, true ),
+    new TypeDef("ushort ", false, false, false, true ),
+    new TypeDef("uint   ", false, false, false, true ),
+    new TypeDef("ulong  ", false, false, false, true ),
+    new TypeDef("sbyte  ", true , true , false, true ),
+    new TypeDef("short  ", true , true , false, true ),
+    new TypeDef("int    ", true , true , false, true ),
+    new TypeDef("long   ", true , false, false, true ),
+    new TypeDef("float  ", true , true , false, false),
+    new TypeDef("double ", true , true , false, false),
     new TypeDef("decimal", true , true , false, false),
 };
 #>
@@ -45,17 +45,14 @@ partial class ValueOperation
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T <#=opname#><T>(in T x)
     {
-<# foreach(var type in types) { #>
-        if(typeof(T) == typeof(<#=type.Name#>))
-        {
-<# if(type.IsSupported[opname]) { #>
-            var z = (<#=type#>)(<#=op($"Unsafe.As<T, {type}>(ref Unsafe.AsRef(x))")#>);
-            return Unsafe.As<<#=type#>, T>(ref z);
-<# } else { #>
-            throw new NotSupportedException();
+<# foreach(var type in types.Where(type => type.IsSupported[opname])) { #>
+        if(typeof(T) == typeof(<#=type.Name#>)) return As<<#=type#>, T>((<#=type#>)(<#=op($"As<T, {type}>(x)")#>));
 <# } #>
-        }
+
+<# foreach(var type in types.Where(type => !type.IsSupported[opname])) { #>
+        if(typeof(T) == typeof(<#=type.Name#>)) throw new NotSupportedException();
 <# } #>
+
         return Cache<T>.Instance.<#=opname#>(x);
     }
 

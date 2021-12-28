@@ -15,78 +15,19 @@ partial class ValueOperation
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Equals<T>(in T x, in T y)
     {
-        if(typeof(T) == typeof(bool))
-        {
-            var xx = Unsafe.As<T, bool>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, bool>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(byte))
-        {
-            var xx = Unsafe.As<T, byte>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, byte>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(ushort))
-        {
-            var xx = Unsafe.As<T, ushort>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, ushort>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(uint))
-        {
-            var xx = Unsafe.As<T, uint>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, uint>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(ulong))
-        {
-            var xx = Unsafe.As<T, ulong>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, ulong>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(sbyte))
-        {
-            var xx = Unsafe.As<T, sbyte>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, sbyte>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(short))
-        {
-            var xx = Unsafe.As<T, short>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, short>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(int))
-        {
-            var xx = Unsafe.As<T, int>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, int>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(long))
-        {
-            var xx = Unsafe.As<T, long>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, long>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(float))
-        {
-            var xx = Unsafe.As<T, float>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, float>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(double))
-        {
-            var xx = Unsafe.As<T, double>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, double>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
-        if(typeof(T) == typeof(decimal))
-        {
-            var xx = Unsafe.As<T, decimal>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, decimal>(ref Unsafe.AsRef(y));
-            return xx == yy;
-        }
+        if(typeof(T) == typeof(bool   )) return As<T, bool   >(x) == As<T, bool   >(y);
+        if(typeof(T) == typeof(byte   )) return As<T, byte   >(x) == As<T, byte   >(y);
+        if(typeof(T) == typeof(ushort )) return As<T, ushort >(x) == As<T, ushort >(y);
+        if(typeof(T) == typeof(uint   )) return As<T, uint   >(x) == As<T, uint   >(y);
+        if(typeof(T) == typeof(ulong  )) return As<T, ulong  >(x) == As<T, ulong  >(y);
+        if(typeof(T) == typeof(sbyte  )) return As<T, sbyte  >(x) == As<T, sbyte  >(y);
+        if(typeof(T) == typeof(short  )) return As<T, short  >(x) == As<T, short  >(y);
+        if(typeof(T) == typeof(int    )) return As<T, int    >(x) == As<T, int    >(y);
+        if(typeof(T) == typeof(long   )) return As<T, long   >(x) == As<T, long   >(y);
+        if(typeof(T) == typeof(float  )) return As<T, float  >(x) == As<T, float  >(y);
+        if(typeof(T) == typeof(double )) return As<T, double >(x) == As<T, double >(y);
+        if(typeof(T) == typeof(decimal)) return As<T, decimal>(x) == As<T, decimal>(y);
+
         return Cache<T>.Instance.Equals(x, y);
     }
 
@@ -100,86 +41,60 @@ partial class ValueOperation
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Compare<T>(in T x, in T y)
     {
-        if(typeof(T) == typeof(bool))
+        if(typeof(T) == typeof(byte   ))
         {
-            throw new NotSupportedException();
+            var xx = As<T, byte   >(x);
+            var yy = As<T, byte   >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(byte))
+        if(typeof(T) == typeof(ushort ))
         {
-            var xx = Unsafe.As<T, byte>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, byte>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
+            var xx = As<T, ushort >(x);
+            var yy = As<T, ushort >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(ushort))
+        if(typeof(T) == typeof(uint   ))
         {
-            var xx = Unsafe.As<T, ushort>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, ushort>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
+            var xx = As<T, uint   >(x);
+            var yy = As<T, uint   >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(uint))
+        if(typeof(T) == typeof(ulong  ))
         {
-            var xx = Unsafe.As<T, uint>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, uint>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
+            var xx = As<T, ulong  >(x);
+            var yy = As<T, ulong  >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(ulong))
+        if(typeof(T) == typeof(sbyte  ))
         {
-            var xx = Unsafe.As<T, ulong>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, ulong>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
+            var xx = As<T, sbyte  >(x);
+            var yy = As<T, sbyte  >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(sbyte))
+        if(typeof(T) == typeof(short  ))
         {
-            var xx = Unsafe.As<T, sbyte>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, sbyte>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
+            var xx = As<T, short  >(x);
+            var yy = As<T, short  >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(short))
+        if(typeof(T) == typeof(int    ))
         {
-            var xx = Unsafe.As<T, short>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, short>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
+            var xx = As<T, int    >(x);
+            var yy = As<T, int    >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(int))
+        if(typeof(T) == typeof(long   ))
         {
-            var xx = Unsafe.As<T, int>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, int>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
+            var xx = As<T, long   >(x);
+            var yy = As<T, long   >(y);
+            return (xx == yy) ? 0 : ((xx > yy) ? 1 : -1);
         }
-        if(typeof(T) == typeof(long))
-        {
-            var xx = Unsafe.As<T, long>(ref Unsafe.AsRef(x));
-            var yy = Unsafe.As<T, long>(ref Unsafe.AsRef(y));
-            if(xx == yy)
-                return 0;
-            return xx > yy ? 1: -1;
-        }
-        if(typeof(T) == typeof(float))
-        {
-            throw new NotSupportedException();
-        }
-        if(typeof(T) == typeof(double))
-        {
-            throw new NotSupportedException();
-        }
-        if(typeof(T) == typeof(decimal))
-        {
-            throw new NotSupportedException();
-        }
+
+        if(typeof(T) == typeof(bool   )) throw new NotSupportedException();
+        if(typeof(T) == typeof(float  )) throw new NotSupportedException();
+        if(typeof(T) == typeof(double )) throw new NotSupportedException();
+        if(typeof(T) == typeof(decimal)) throw new NotSupportedException();
+
         return Cache<T>.Instance.Compare(x, y);
     }
 }
