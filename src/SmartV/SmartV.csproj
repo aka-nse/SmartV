@@ -101,6 +101,18 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Update="VectorOperation.Compile.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>VectorOperation.Compile.g.cs</LastGenOutput>
+        </None>
+        <Compile Update="VectorOperation.Compile.g.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>VectorOperation.Compile.tt</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
         <None Update="VectorOperation.Binary.tt">
             <Generator>TextTemplatingFileGenerator</Generator>
             <LastGenOutput>VectorOperation.Binary.g.cs</LastGenOutput>
@@ -109,6 +121,18 @@
             <DesignTime>True</DesignTime>
             <AutoGen>True</AutoGen>
             <DependentUpon>VectorOperation.Binary.tt</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="VectorOperation.Vectorize.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>VectorOperation.Vectorize.g.cs</LastGenOutput>
+        </None>
+        <Compile Update="VectorOperation.Vectorize.g.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>VectorOperation.Vectorize.tt</DependentUpon>
         </Compile>
     </ItemGroup>
 

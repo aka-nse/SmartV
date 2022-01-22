@@ -7,195 +7,290 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 namespace SmartV;
 
-unsafe partial class VectorOperation
+partial interface IVectorOperation
 {
-
     /// <summary> Operates <c>UnaryPlus</c> unaly operation. </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="x"></param>
     /// <param name="ans"></param>
-    /// <param name="iterationStrategy">
-    /// <para>The iteration strategy provider.</para>
-    /// <para>If <c>null</c> or <see cref="IterationStrategy.Default"/>, the iteration logic will be optimized with standard for-loop.</para>
-    /// </param>
     /// <exception cref="ArgumentException">
     /// The length of <paramref name="x"/> and <paramref name="ans"/> must be same.
     /// </exception>
     /// <exception cref="NotSupportedException" />
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void UnaryPlus<T>(ReadOnlySpan<T> x, Span<T> ans, IIterationStrategy? iterationStrategy = null)
-        where T : unmanaged
+    void UnaryPlus<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged;
+}
+
+unsafe partial class VectorOperation
+{
+    partial class _Default
     {
-        AssertSizeMatch(x, ans, nameof(x), nameof(ans));
-            
-        var len = ans.Length;
-        var i = 0;
-        if(typeof(T) == typeof(byte)
-            || typeof(T) == typeof(ushort)
-            || typeof(T) == typeof(uint)
-            || typeof(T) == typeof(ulong)
-            || typeof(T) == typeof(sbyte)
-            || typeof(T) == typeof(short)
-            || typeof(T) == typeof(int)
-            || typeof(T) == typeof(long)
-            || typeof(T) == typeof(float)
-            || typeof(T) == typeof(double))
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UnaryPlus<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged
         {
-            var vlen = GetVectorizableLength(ans);
-            var vx = Cast(x, vlen);
-            var vans = Cast(ans, vlen);
-            if(iterationStrategy.IsDefault())
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
             {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vans = Cast(ans, vlen);
                 for(var j = 0; j < vans.Length; ++j)
                 {
                     vans[j] = vx[j];
                 }
+                i = vlen;
             }
-            else
+            for(; i < ans.Length; ++i)
             {
+                ans[i] = ValueOperation.UnaryPlus(x[i]);
+            }
+        }
+    }
+
+    
+    partial class _Parallelized
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UnaryPlus<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vans = Cast(ans, vlen);
                 fixed(Vector<T>* ptr_vx = vx)
                 fixed(Vector<T>* ptr_vans = vans)
                 {
                     var _ptr_vx = ptr_vx;
                     var _ptr_vans = ptr_vans;
-                    iterationStrategy!.For(0, vans.Length, j =>
+                    Parallel.For(0, vans.Length, Options, j =>
                     {
                         _ptr_vans[j] = _ptr_vx[j];
                     });
                 }
+                i = vlen;
             }
-            i = vlen;
-        }
-        for(; i < ans.Length; ++i)
-        {
-            ans[i] = ValueOperation.UnaryPlus(x[i]);
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = ValueOperation.UnaryPlus(x[i]);
+            }
         }
     }
+}
 
 
+partial interface IVectorOperation
+{
     /// <summary> Operates <c>UnaryMinus</c> unaly operation. </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="x"></param>
     /// <param name="ans"></param>
-    /// <param name="iterationStrategy">
-    /// <para>The iteration strategy provider.</para>
-    /// <para>If <c>null</c> or <see cref="IterationStrategy.Default"/>, the iteration logic will be optimized with standard for-loop.</para>
-    /// </param>
     /// <exception cref="ArgumentException">
     /// The length of <paramref name="x"/> and <paramref name="ans"/> must be same.
     /// </exception>
     /// <exception cref="NotSupportedException" />
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void UnaryMinus<T>(ReadOnlySpan<T> x, Span<T> ans, IIterationStrategy? iterationStrategy = null)
-        where T : unmanaged
+    void UnaryMinus<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged;
+}
+
+unsafe partial class VectorOperation
+{
+    partial class _Default
     {
-        AssertSizeMatch(x, ans, nameof(x), nameof(ans));
-            
-        var len = ans.Length;
-        var i = 0;
-        if(typeof(T) == typeof(byte)
-            || typeof(T) == typeof(ushort)
-            || typeof(T) == typeof(uint)
-            || typeof(T) == typeof(ulong)
-            || typeof(T) == typeof(sbyte)
-            || typeof(T) == typeof(short)
-            || typeof(T) == typeof(int)
-            || typeof(T) == typeof(long)
-            || typeof(T) == typeof(float)
-            || typeof(T) == typeof(double))
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UnaryMinus<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged
         {
-            var vlen = GetVectorizableLength(ans);
-            var vx = Cast(x, vlen);
-            var vans = Cast(ans, vlen);
-            if(iterationStrategy.IsDefault())
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
             {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vans = Cast(ans, vlen);
                 for(var j = 0; j < vans.Length; ++j)
                 {
                     vans[j] = -vx[j];
                 }
+                i = vlen;
             }
-            else
+            for(; i < ans.Length; ++i)
             {
+                ans[i] = ValueOperation.UnaryMinus(x[i]);
+            }
+        }
+    }
+
+    
+    partial class _Parallelized
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UnaryMinus<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vans = Cast(ans, vlen);
                 fixed(Vector<T>* ptr_vx = vx)
                 fixed(Vector<T>* ptr_vans = vans)
                 {
                     var _ptr_vx = ptr_vx;
                     var _ptr_vans = ptr_vans;
-                    iterationStrategy!.For(0, vans.Length, j =>
+                    Parallel.For(0, vans.Length, Options, j =>
                     {
                         _ptr_vans[j] = -_ptr_vx[j];
                     });
                 }
+                i = vlen;
             }
-            i = vlen;
-        }
-        for(; i < ans.Length; ++i)
-        {
-            ans[i] = ValueOperation.UnaryMinus(x[i]);
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = ValueOperation.UnaryMinus(x[i]);
+            }
         }
     }
+}
 
 
+partial interface IVectorOperation
+{
     /// <summary> Operates <c>Complement</c> unaly operation. </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="x"></param>
     /// <param name="ans"></param>
-    /// <param name="iterationStrategy">
-    /// <para>The iteration strategy provider.</para>
-    /// <para>If <c>null</c> or <see cref="IterationStrategy.Default"/>, the iteration logic will be optimized with standard for-loop.</para>
-    /// </param>
     /// <exception cref="ArgumentException">
     /// The length of <paramref name="x"/> and <paramref name="ans"/> must be same.
     /// </exception>
     /// <exception cref="NotSupportedException" />
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Complement<T>(ReadOnlySpan<T> x, Span<T> ans, IIterationStrategy? iterationStrategy = null)
-        where T : unmanaged
+    void Complement<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged;
+}
+
+unsafe partial class VectorOperation
+{
+    partial class _Default
     {
-        AssertSizeMatch(x, ans, nameof(x), nameof(ans));
-            
-        var len = ans.Length;
-        var i = 0;
-        if(typeof(T) == typeof(byte)
-            || typeof(T) == typeof(ushort)
-            || typeof(T) == typeof(uint)
-            || typeof(T) == typeof(ulong)
-            || typeof(T) == typeof(sbyte)
-            || typeof(T) == typeof(short)
-            || typeof(T) == typeof(int)
-            || typeof(T) == typeof(long)
-            || typeof(T) == typeof(float)
-            || typeof(T) == typeof(double))
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Complement<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged
         {
-            var vlen = GetVectorizableLength(ans);
-            var vx = Cast(x, vlen);
-            var vans = Cast(ans, vlen);
-            if(iterationStrategy.IsDefault())
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
             {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vans = Cast(ans, vlen);
                 for(var j = 0; j < vans.Length; ++j)
                 {
                     vans[j] = ~vx[j];
                 }
+                i = vlen;
             }
-            else
+            for(; i < ans.Length; ++i)
             {
+                ans[i] = ValueOperation.Complement(x[i]);
+            }
+        }
+    }
+
+    
+    partial class _Parallelized
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Complement<T>(ReadOnlySpan<T> x, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vans = Cast(ans, vlen);
                 fixed(Vector<T>* ptr_vx = vx)
                 fixed(Vector<T>* ptr_vans = vans)
                 {
                     var _ptr_vx = ptr_vx;
                     var _ptr_vans = ptr_vans;
-                    iterationStrategy!.For(0, vans.Length, j =>
+                    Parallel.For(0, vans.Length, Options, j =>
                     {
                         _ptr_vans[j] = ~_ptr_vx[j];
                     });
                 }
+                i = vlen;
             }
-            i = vlen;
-        }
-        for(; i < ans.Length; ++i)
-        {
-            ans[i] = ValueOperation.Complement(x[i]);
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = ValueOperation.Complement(x[i]);
+            }
         }
     }
-
 }
+

@@ -28,58 +28,253 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 namespace SmartV;
 
-unsafe partial class VectorOperation
-{
 <# foreach(var (opname, v_op, s_op) in operations) { #>
+
+partial interface IVectorOperation
+{
+    /// <summary> Operates <c><#=opname#></c> unaly operation. </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="ans"></param>
+    /// <exception cref="ArgumentException">
+    /// <para>The length of <paramref name="y"/> and <paramref name="ans"/> must be same.</para>
+    /// </exception>
+    /// <exception cref="NotSupportedException" />
+    public void <#=opname#><T>(T x, ReadOnlySpan<T> y, Span<T> ans) where T : unmanaged;
 
     /// <summary> Operates <c><#=opname#></c> unaly operation. </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <param name="ans"></param>
-    /// <param name="iterationStrategy">
-    /// <para>The iteration strategy provider.</para>
-    /// <para>If <c>null</c> or <see cref="IterationStrategy.Default"/>, the iteration logic will be optimized with standard for-loop.</para>
-    /// </param>
+    /// <exception cref="ArgumentException">
+    /// <para>The length of <paramref name="x"/> and <paramref name="ans"/> must be same.</para>
+    /// </exception>
+    /// <exception cref="NotSupportedException" />
+    public void <#=opname#><T>(ReadOnlySpan<T> x, T y, Span<T> ans) where T : unmanaged;
+    
+    /// <summary> Operates <c><#=opname#></c> unaly operation. </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="ans"></param>
     /// <exception cref="ArgumentException">
     /// <para>The length of <paramref name="x"/> and <paramref name="ans"/> must be same.</para>
     /// <para>or</para>
     /// <para>The length of <paramref name="y"/> and <paramref name="ans"/> must be same.</para>
     /// </exception>
     /// <exception cref="NotSupportedException" />
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void <#=opname#><T>(ReadOnlySpan<T> x, ReadOnlySpan<T> y, Span<T> ans, IIterationStrategy? iterationStrategy = null)
-        where T : unmanaged
+    public void <#=opname#><T>(ReadOnlySpan<T> x, ReadOnlySpan<T> y, Span<T> ans) where T : unmanaged;
+}
+
+unsafe partial class VectorOperation
+{
+    partial class _Default
     {
-        AssertSizeMatch(x, ans, nameof(x), nameof(ans));
-        AssertSizeMatch(y, ans, nameof(y), nameof(ans));
-            
-        var len = ans.Length;
-        var i = 0;
-        if(typeof(T) == typeof(byte)
-            || typeof(T) == typeof(ushort)
-            || typeof(T) == typeof(uint)
-            || typeof(T) == typeof(ulong)
-            || typeof(T) == typeof(sbyte)
-            || typeof(T) == typeof(short)
-            || typeof(T) == typeof(int)
-            || typeof(T) == typeof(long)
-            || typeof(T) == typeof(float)
-            || typeof(T) == typeof(double))
+        public void <#=opname#><T>(T x, ReadOnlySpan<T> y, Span<T> ans) where T : unmanaged
         {
-            var vlen = GetVectorizableLength(ans);
-            var vx = Cast(x, vlen);
-            var vy = Cast(y, vlen);
-            var vans = Cast(ans, vlen);
-            if(iterationStrategy.IsDefault())
+            AssertSizeMatch(y, ans, nameof(y), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
             {
+                var vlen = GetVectorizableLength(ans);
+                var vx = new Vector<T>(x);
+                var vy = Cast(y, vlen);
+                var vans = Cast(ans, vlen);
+                for(var j = 0; j < vans.Length; ++j)
+                {
+                    vans[j] = <#=v_op("vx", "vy[j]")#>;
+                }
+                i = vlen;
+            }
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = <#=s_op("x", "y[i]")#>;
+            }
+        }
+
+        public void <#=opname#><T>(ReadOnlySpan<T> x, T y, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vy =new Vector<T>(y);
+                var vans = Cast(ans, vlen);
+                for(var j = 0; j < vans.Length; ++j)
+                {
+                    vans[j] = <#=v_op("vx[j]", "vy")#>;
+                }
+                i = vlen;
+            }
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = <#=s_op("x[i]", "y")#>;
+            }
+        }
+
+        public void <#=opname#><T>(ReadOnlySpan<T> x, ReadOnlySpan<T> y, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            AssertSizeMatch(y, ans, nameof(y), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vy = Cast(y, vlen);
+                var vans = Cast(ans, vlen);
                 for(var j = 0; j < vans.Length; ++j)
                 {
                     vans[j] = <#=v_op("vx[j]", "vy[j]")#>;
                 }
+                i = vlen;
             }
-            else
+            for(; i < ans.Length; ++i)
             {
+                ans[i] = <#=s_op("x[i]", "y[i]")#>;
+            }
+        }
+    }
+
+    partial class _Parallelized
+    {
+        public void <#=opname#><T>(T x, ReadOnlySpan<T> y, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(y, ans, nameof(y), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = new Vector<T>(x);
+                var vy = Cast(y, vlen);
+                var vans = Cast(ans, vlen);
+                fixed(Vector<T>* ptr_vy = vy)
+                fixed(Vector<T>* ptr_vans = vans)
+                {
+                    var _ptr_vy = ptr_vy;
+                    var _ptr_vans = ptr_vans;
+                    Parallel.For(0, vans.Length, Options, j =>
+                    {
+                        _ptr_vans[j] = <#=v_op("vx", "_ptr_vy[j]")#>;
+                    });
+                }
+                i = vlen;
+            }
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = <#=s_op("x", "y[i]")#>;
+            }
+        }
+
+        public void <#=opname#><T>(ReadOnlySpan<T> x, T y, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vy =new Vector<T>(y);
+                var vans = Cast(ans, vlen);
+                fixed(Vector<T>* ptr_vx = vx)
+                fixed(Vector<T>* ptr_vans = vans)
+                {
+                    var _ptr_vx = ptr_vx;
+                    var _ptr_vans = ptr_vans;
+                    Parallel.For(0, vans.Length, Options, j =>
+                    {
+                        _ptr_vans[j] = <#=v_op("_ptr_vx[j]", "vy")#>;
+                    });
+                }
+                i = vlen;
+            }
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = <#=s_op("x[i]", "y")#>;
+            }
+        }
+
+        public void <#=opname#><T>(ReadOnlySpan<T> x, ReadOnlySpan<T> y, Span<T> ans) where T : unmanaged
+        {
+            AssertSizeMatch(x, ans, nameof(x), nameof(ans));
+            AssertSizeMatch(y, ans, nameof(y), nameof(ans));
+            
+            var len = ans.Length;
+            var i = 0;
+            if(typeof(T) == typeof(byte)
+                || typeof(T) == typeof(ushort)
+                || typeof(T) == typeof(uint)
+                || typeof(T) == typeof(ulong)
+                || typeof(T) == typeof(sbyte)
+                || typeof(T) == typeof(short)
+                || typeof(T) == typeof(int)
+                || typeof(T) == typeof(long)
+                || typeof(T) == typeof(float)
+                || typeof(T) == typeof(double))
+            {
+                var vlen = GetVectorizableLength(ans);
+                var vx = Cast(x, vlen);
+                var vy = Cast(y, vlen);
+                var vans = Cast(ans, vlen);
                 fixed(Vector<T>* ptr_vx = vx)
                 fixed(Vector<T>* ptr_vy = vy)
                 fixed(Vector<T>* ptr_vans = vans)
@@ -87,19 +282,19 @@ unsafe partial class VectorOperation
                     var _ptr_vx = ptr_vx;
                     var _ptr_vy = ptr_vy;
                     var _ptr_vans = ptr_vans;
-                    iterationStrategy!.For(0, vans.Length, j =>
+                    Parallel.For(0, vans.Length, Options, j =>
                     {
                         _ptr_vans[j] = <#=v_op("_ptr_vx[j]", "_ptr_vy[j]")#>;
                     });
                 }
+                i = vlen;
             }
-            i = vlen;
-        }
-        for(; i < ans.Length; ++i)
-        {
-            ans[i] = <#=s_op("x[i]", "y[i]")#>;
+            for(; i < ans.Length; ++i)
+            {
+                ans[i] = <#=s_op("x[i]", "y[i]")#>;
+            }
         }
     }
+}
 
 <# } #>
-}
